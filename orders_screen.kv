@@ -1,0 +1,107 @@
+<OrdersScreen>:
+    name: "orders"
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(20)
+        spacing: dp(20)
+        canvas.before:
+            Color:
+                rgba: 0.95, 0.90, 1, 1   # very light lavender background
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Label:
+            text: "📦 Orders (Scoops)"
+            font_size: dp(28)
+            bold: True
+            color: 0.2, 0.1, 0.3, 1
+            size_hint_y: None
+            height: dp(50)
+            halign: "center"
+
+        # ---------- Search Bar ----------
+        BoxLayout:
+            size_hint_y: None
+            height: dp(40)
+            spacing: dp(10)
+
+            Label:
+                text: "Search:"
+                size_hint_x: None
+                width: dp(80)
+                font_size: dp(18)
+                color: 0, 0, 0, 1
+
+            TextInput:
+                id: search_input
+                multiline: False
+                font_size: dp(18)
+                background_color: 1, 1, 1, 1
+                foreground_color: 0, 0, 0, 1
+                on_text: root.on_search_changed(self, self.text)
+
+        Label:
+            text: "All Scoops / Orders:"
+            font_size: dp(22)
+            bold: True
+            color: 0.2, 0.1, 0.3, 1
+            size_hint_y: None
+            height: dp(40)
+
+        # ---------- Orders List ----------
+        RecycleView:
+            id: rv_orders
+            size_hint_y: 0.8
+            viewclass: "OrderLabel"
+            data: [{"text": item, "parent_screen": root} for item in root.orders_display]
+
+
+            RecycleBoxLayout:
+                orientation: "vertical"
+                size_hint_y: None
+                height: self.minimum_height
+                default_size: None, dp(40)
+                default_size_hint: 1, None
+                spacing: dp(2)
+
+        # ---------- Buttons ----------
+        BoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            spacing: dp(20)
+
+            Button:
+                text: "Generate Invoice"
+                font_size: dp(18)
+                background_normal: ""
+                background_color: 0.70, 0.50, 0.90, 1
+                color: 1, 1, 1, 1
+                on_release: root.generate_invoice_action()
+
+            Button:
+                text: "Close"
+                font_size: dp(18)
+                background_normal: ""
+                background_color: 0.6, 0.6, 0.6, 1
+                on_release: app.root.current = "dashboard"
+
+        Label:
+            id: status_label
+            text: ""
+            font_size: dp(16)
+            color: 0.4, 0.1, 0.4, 1
+
+
+# ---------- Lavender List Item ----------
+<OrderLabel>:
+    parent_screen: None
+    font_size: dp(16)
+    size_hint_y: None
+    height: dp(50)
+    background_normal: ""
+    background_color: 0.90, 0.80, 1, 1
+    color: 0.2, 0.1, 0.3, 1
+    on_release: self.parent_screen.select_order(self.text)
+

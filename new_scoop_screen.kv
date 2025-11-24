@@ -1,0 +1,186 @@
+#:kivy 2.3.0
+
+<NewScoopScreen>:
+    client_search: client_search_id
+    client_dropdown: client_dropdown_id
+    item_search: item_search_id
+    item_dropdown: item_dropdown_id
+    quantity_input: quantity_input_id
+    scoop_price_input: scoop_price_input_id
+    scoop_items_container: scoop_items_container_id
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: dp(8)
+        spacing: dp(4)
+        canvas.before:
+            Color:
+                rgba: (0.95, 0.92, 1, 1)  # lavender background
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        # ---------- Top Bar ----------
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            spacing: 10
+
+            Button:
+                text: "⬅ Back"
+                size_hint_x: None
+                width: 120
+                font_size: 16
+                bold: True
+                background_color: (0.65, 0.5, 0.9, 1)
+                color: (1, 1, 1, 1)
+                on_release: root.manager.current = "dashboard"
+
+            Label:
+                text: "🍨 New Scoop"
+                font_size: 26
+                bold: True
+                color: (0.4, 0.1, 0.5, 1)
+                halign: "left"
+                valign: "middle"
+
+        # ---------- Client Selection ----------
+        BoxLayout:
+            size_hint_y: None
+            height: dp(40)
+            spacing: dp(4)
+
+            Label:
+                text: "Search Client:"
+                size_hint_x: None
+                width: dp(120)
+                font_size: 20
+                color: (0,0,0,1)
+
+            TextInput:
+                id: client_search_id
+                multiline: False
+                font_size: 20
+
+            Spinner:
+                id: client_dropdown_id
+                text: ""
+                values: []
+                font_size: 20
+
+        # ---------- Scoop Price ----------
+        BoxLayout:
+            size_hint_y: None
+            height: dp(32)
+            spacing: dp(4)
+
+            Label:
+                text: "Scoop Price (R):"
+                size_hint_x: None
+                width: dp(120)
+                font_size: 20
+                color: (0,0,0,1)
+
+            TextInput:
+                id: scoop_price_input_id
+                text: "300"
+                multiline: False
+                font_size: 20
+                size_hint_y: None    # important to allow custom height
+                height: dp(24)       # adjust to your desired height
+                padding_y: (0,0)     # optional: vertically center text
+
+        # ---------- Item Selection ----------
+        GridLayout:
+            cols: 3
+            size_hint_y: None
+            height: dp(32)
+            spacing: dp(4)
+
+            Label:
+                text: "Search Item:"
+                size_hint_x: None
+                width: dp(120)
+                font_size: 20
+                color: (0,0,0,1)
+            TextInput:
+                id: item_search_id
+                multiline: False
+                font_size: 16
+            Widget:
+
+            Label:
+                text: "Select Item:"
+                size_hint_x: None
+                width: dp(120)
+                font_size: 20
+                color: (0,0,0,1)
+            Spinner:
+                id: item_dropdown_id
+                text: ""
+                values: []
+                font_size: 20
+            BoxLayout:
+                spacing: dp(4)
+                TextInput:
+                    id: quantity_input_id
+                    text: "1"
+                    multiline: False
+                    font_size: 16
+                Button:
+                    text: "Add Item"
+                    font_size: 20
+                    background_color: (0.65,0.5,0.9,1)
+                    color: (1,1,1,1)
+                    on_release: root.add_item_to_scoop()
+                Button:
+                    text: "Remove Item"
+                    font_size: 20
+                    background_color: (0.9,0.5,0.6,1)
+                    color: (1,1,1,1)
+                    on_release: root.remove_last_item()
+
+        # ---------- Table Label ----------
+        Label:
+            text: "Scoop Items:"
+            font_size: 26
+            bold: True
+            color: 0.5, 0.3, 0.7, 1  # purplish
+            size_hint_y: None
+            height: dp(32)
+            halign: "center"
+            valign: "middle"
+            text_size: self.size
+
+        # ---------- Table ----------
+        ScrollView:
+            size_hint_y: 1
+            do_scroll_x: False
+
+            GridLayout:
+                id: scoop_items_container_id
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                row_default_height: dp(32)
+                spacing: dp(2)
+
+        # ---------- Finalize Buttons ----------
+        BoxLayout:
+            size_hint_y: None
+            height: dp(40)
+            spacing: dp(4)
+
+            Button:
+                text: "Finalize Scoop"
+                font_size: 20
+                background_color: (0.65,0.5,0.9,1)
+                color: (1,1,1,1)
+                on_release: root.finalize_scoop()
+
+            Button:
+                text: "Close"
+                font_size: 20
+                background_color: (0.9,0.5,0.5,1)
+                color: (1,1,1,1)
+                on_release: root.manager.current = "dashboard"

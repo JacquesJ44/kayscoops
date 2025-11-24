@@ -1,0 +1,84 @@
+#:kivy 2.3.0
+
+<DashboardScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        padding: 15
+        spacing: 10
+        canvas.before:
+            Color:
+                rgba: (0.95, 0.92, 1, 1)  # lavender background
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        # ---------- Title ----------
+        Label:
+            text: "🍨 Kay Scoops 🍨"
+            font_size: 36
+            bold: True
+            color: (0.4, 0.1, 0.5, 1)
+            size_hint_y: None
+            height: 80
+            halign: "center"
+            valign: "middle"
+
+        # ---------- Separator ----------
+        Widget:
+            size_hint_y: None
+            height: 10
+
+        # ---------- Buttons ----------
+        GridLayout:
+            cols: 2
+            row_force_default: True
+            row_default_height: 80
+            spacing: 20
+
+            Button:
+                text: "Clients"
+                font_size: 20
+                bold: True
+                background_color: (0.65, 0.5, 0.9, 1)  # lavender button
+                color: (1, 1, 1, 1)
+                on_release: root.go_to_clients()
+
+            Button:
+                text: "Items"
+                font_size: 20
+                bold: True
+                background_color: (0.6, 0.7, 0.95, 1)
+                color: (1, 1, 1, 1)
+                on_release: root.go_to_items()
+
+            Button:
+                text: "New Scoop"
+                font_size: 20
+                bold: True
+                background_color: (0.5, 0.8, 0.9, 1)
+                color: (1, 1, 1, 1)
+                on_release: root.go_to_newscoop()
+
+            Button:
+                text: "Orders"
+                font_size: 20
+                bold: True
+                background_color: (0.9, 0.6, 0.7, 1)
+                color: (1, 1, 1, 1)
+                on_release: root.go_to_orders()
+
+        # ---------- Separator ----------
+        Widget:
+            size_hint_y: None
+            height: 20
+
+        # ---------- Exit Button ----------
+        Button:
+            text: "Exit"
+            size_hint_y: None
+            height: 60
+            font_size: 18
+            bold: True
+            background_color: (0.8, 0.4, 0.4, 1)
+            color: (1, 1, 1, 1)
+            on_release: root.exit_app()

@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Kivy / Buildozer
+.buildozer/
+*.spec
+*.apk
+*.zip
+*.exe
+*.obb
+*.so
+*.a
+*.pyx
+*.pyd
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs / Editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Misc
+*.db
+*.sqlite3
+*.pdf

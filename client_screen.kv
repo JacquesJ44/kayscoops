@@ -1,0 +1,155 @@
+#:kivy 2.3.0
+
+<ClientScreen>:
+    name_input: name_input_id
+    contact_input: contact_input_id
+    email_input: email_input_id
+    search_input: search_input_id
+    client_list: client_list_id
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: 15
+        spacing: 10
+        canvas.before:
+            Color:
+                rgba: (0.95, 0.92, 1, 1)  # lavender background
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        # ---------- Top Bar ----------
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            spacing: 10
+
+            Button:
+                text: "⬅ Back"
+                size_hint_x: None
+                width: 120
+                font_size: 16
+                bold: True
+                background_color: (0.65, 0.5, 0.9, 1)
+                color: (1, 1, 1, 1)
+                on_release: root.manager.current = "dashboard"
+
+            Label:
+                text: "👩‍💼 Client Management"
+                font_size: 26
+                bold: True
+                color: (0.4, 0.1, 0.5, 1)
+                halign: "left"
+                valign: "middle"
+
+        # ---------- Input Fields ----------
+        GridLayout:
+            cols: 2
+            row_force_default: True
+            row_default_height: 40
+            spacing: 10
+
+            Label:
+                text: "Name:"
+                size_hint_x: None
+                width: 100
+                font_size: 18
+                halign: "right"
+                valign: "middle"
+                color: 0, 0, 0, 1
+                text_size: self.width, None
+
+            TextInput:
+                id: name_input_id
+                multiline: False
+                font_size: 18
+
+            Label:
+                text: "Contact Number:"
+                size_hint_x: None
+                width: 100
+                font_size: 18
+                halign: "right"
+                valign: "middle"
+                color: 0, 0, 0, 1
+                text_size: self.width, None
+            TextInput:
+                id: contact_input_id
+                multiline: False
+                font_size: 18
+
+            Label:
+                text: "Email:"
+                size_hint_x: None
+                width: 100
+                font_size: 18
+                halign: "right"
+                valign: "middle"
+                color: 0, 0, 0, 1
+                text_size: self.width, None
+            TextInput:
+                id: email_input_id
+                multiline: False
+                font_size: 18
+
+        # ---------- Action Buttons ----------
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            spacing: 10
+
+            Button:
+                text: "Add Client"
+                font_size: 16
+                background_color: (0.65, 0.5, 0.9, 1)
+                color: (1, 1, 1, 1)
+                on_release: root.add_client()
+
+            Button:
+                text: "Update Client"
+                font_size: 16
+                background_color: (0.5, 0.7, 0.9, 1)
+                color: (1, 1, 1, 1)
+                on_release: root.update_client()
+
+            Button:
+                text: "Delete Client"
+                font_size: 16
+                background_color: (0.9, 0.5, 0.6, 1)
+                color: (1, 1, 1, 1)
+                on_release: root.delete_client()
+
+        # ---------- Search ----------
+        BoxLayout:
+            size_hint_y: None
+            height: 40
+            spacing: 10
+
+            TextInput:
+                id: search_input_id
+                multiline: False
+                hint_text: "🔍 Search clients..."
+                font_size: 16
+                on_text: root.on_search(self.text)
+
+            Button:
+                text: "❌"
+                size_hint_x: None
+                width: 40
+                font_size: 16
+                background_color: (0.9,0.4,0.4,1)
+                color: (1,1,1,1)
+                on_release:
+                    search_input_id.text = ""
+                    root.refresh_clients()
+
+        # ---------- Client Table ----------
+        ScrollView:
+            do_scroll_x: False
+            GridLayout:
+                id: client_list_id
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                row_default_height: 40
+                spacing: 2

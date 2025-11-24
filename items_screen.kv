@@ -1,0 +1,170 @@
+#:kivy 2.3.0
+
+<ItemsScreen>:
+    name_input: name_input_id
+    quantity_input: quantity_input_id
+    cost_input: cost_input_id
+    selling_input: selling_input_id
+    search_input: search_input_id
+    items_list: items_list_id
+
+    BoxLayout:
+        orientation: "vertical"
+        padding: 15
+        spacing: 10
+        canvas.before:
+            Color:
+                rgba: (0.95, 0.92, 1, 1)  # lavender background
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        # ---------- Top Bar ----------
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            spacing: 10
+
+            Button:
+                text: "⬅ Back"
+                size_hint_x: None
+                width: 120
+                font_size: 16
+                bold: True
+                background_color: (0.65, 0.5, 0.9, 1)
+                color: (1, 1, 1, 1)
+                on_release: root.manager.current = "dashboard"
+
+            Label:
+                text: "📦 Item Management"
+                font_size: 26
+                bold: True
+                color: (0.4, 0.1, 0.5, 1)
+                halign: "left"
+                valign: "middle"
+
+        # ---------- Input Fields ----------
+        GridLayout:
+            cols: 2
+            row_force_default: True
+            row_default_height: 40
+            spacing: 10
+
+            Label:
+                text: "Name:"
+                size_hint_x: None
+                width: 100
+                font_size: 18
+                halign: "right"
+                valign: "middle"
+                color: 0, 0, 0, 1
+                text_size: self.width, None
+
+            TextInput:
+                id: name_input_id
+                multiline: False
+                font_size: 18
+
+            Label:
+                text: "Quantity:"
+                size_hint_x: None
+                width: 100
+                font_size: 18
+                halign: "right"
+                valign: "middle"
+                color: 0, 0, 0, 1
+                text_size: self.width, None
+            TextInput:
+                id: quantity_input_id
+                multiline: False
+                font_size: 18
+
+            Label:
+                text: "Cost Price (R):"
+                size_hint_x: None
+                width: 100
+                font_size: 18
+                halign: "right"
+                valign: "middle"
+                color: 0, 0, 0, 1
+                text_size: self.width, None
+            TextInput:
+                id: cost_input_id
+                multiline: False
+                font_size: 18
+
+            Label:
+                text: "Selling Price (R):"
+                size_hint_x: None
+                width: 100
+                font_size: 18
+                halign: "right"
+                valign: "middle"
+                color: 0, 0, 0, 1
+                text_size: self.width, None
+            TextInput:
+                id: selling_input_id
+                multiline: False
+                font_size: 18
+
+        # ---------- Action Buttons ----------
+        BoxLayout:
+            size_hint_y: None
+            height: 50
+            spacing: 10
+
+            Button:
+                text: "Add Item"
+                font_size: 16
+                background_color: (0.65, 0.5, 0.9, 1)
+                color: (1, 1, 1, 1)
+                on_release: root.add_item()
+
+            Button:
+                text: "Update Item"
+                font_size: 16
+                background_color: (0.5, 0.7, 0.9, 1)
+                color: (1, 1, 1, 1)
+                on_release: root.update_item()
+
+            Button:
+                text: "Delete Item"
+                font_size: 16
+                background_color: (0.9, 0.5, 0.6, 1)
+                color: (1, 1, 1, 1)
+                on_release: root.delete_item()
+
+        # ---------- Search ----------
+        BoxLayout:
+            size_hint_y: None
+            height: 40
+            spacing: 10
+
+            TextInput:
+                id: search_input_id
+                multiline: False
+                hint_text: "🔍 Search items..."
+                font_size: 16
+                on_text: root.on_search(self.text)
+
+            Button:
+                text: "❌"
+                size_hint_x: None
+                width: 40
+                font_size: 16
+                background_color: (0.9,0.4,0.4,1)
+                color: (1,1,1,1)
+                on_release:
+                    search_input_id.text = ""
+                    root.refresh_items()
+
+        # ---------- Items Table ----------
+        ScrollView:
+            do_scroll_x: False
+            GridLayout:
+                id: items_list_id
+                cols: 1
+                size_hint_y: None
+                height: self.minimum_height
+                row_default_height: 40
+                spacing: 2
