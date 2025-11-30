@@ -1,10 +1,107 @@
-from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
-from reportlab.lib.units import cm
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
+# from reportlab.lib.pagesizes import A4
+# from reportlab.lib import colors
+# from reportlab.lib.units import cm
+# from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image, Spacer
+# from reportlab.lib.styles import getSampleStyleSheet
+# import sqlite3
+# import os
+
+# def generate_invoice(scoop_id):
+#     conn = sqlite3.connect("scoop_tracker.db")
+#     cursor = conn.cursor()
+
+#     # Fetch scoop + client info
+#     cursor.execute("""
+#         SELECT s.id, s.date, s.total_price, c.name, c.contact_info, c.email
+#         FROM scoops s
+#         JOIN clients c ON s.client_id = c.id
+#         WHERE s.id = ?
+#     """, (scoop_id,))
+#     scoop = cursor.fetchone()
+#     if not scoop:
+#         print("❌ Scoop not found!")
+#         return
+
+#     scoop_id, date, total_price, client_name, phone, email = scoop
+
+#     # Fetch items linked to this scoop
+#     cursor.execute("""
+#         SELECT i.name, si.quantity, i.cost_price, i.selling_price
+#         FROM scoop_items si
+#         JOIN items i ON si.item_id = i.id
+#         WHERE si.scoop_id = ?
+#     """, (scoop_id,))
+#     items = cursor.fetchall()
+#     conn.close()
+
+#     # Prepare PDF
+#     filename = f"invoice_{scoop_id}.pdf"
+#     doc = SimpleDocTemplate(filename, pagesize=A4)
+#     elements = []
+#     styles = getSampleStyleSheet()
+#     title_style = styles["Title"]
+#     normal = styles["Normal"]
+
+#     # Add logo (if exists)
+#     if os.path.exists("assets/kay.png"):
+#         logo = Image("assets/kay.png", width=4*cm, height=4*cm)
+#         logo.hAlign = "LEFT"
+#         elements.append(logo)
+#         elements.append(Spacer(1, 0.5*cm))
+
+#     # Header
+#     elements.append(Paragraph("<b>Kay Scoops - Sweet Surprises</b>", title_style))
+#     elements.append(Spacer(1, 0.3*cm))
+#     elements.append(Paragraph(f"<b>Invoice #{scoop_id}</b>", normal))
+#     elements.append(Paragraph(f"Date: {date}", normal))
+#     elements.append(Spacer(1, 0.3*cm))
+
+#     # Client info
+#     elements.append(Paragraph(f"<b>Client:</b> {client_name}", normal))
+#     if phone:
+#         elements.append(Paragraph(f"<b>Phone:</b> {phone}", normal))
+#     if email:
+#         elements.append(Paragraph(f"<b>Email:</b> {email}", normal))
+#     elements.append(Spacer(1, 0.5*cm))
+
+#     # Item table
+#     table_data = [["Item", "Qty", "Cost Price (R)", "Selling Price (R)"]]
+#     for name, qty, cost, sell in items:
+#         table_data.append([name, qty, f"{cost:.2f}", f"{sell:.2f}"])
+
+#     table = Table(table_data, colWidths=[6*cm, 2*cm, 4*cm, 4*cm])
+#     table.setStyle(TableStyle([
+#         ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f2c4c4")),
+#         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+#         ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+#         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+#         ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
+#         ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+#     ]))
+#     elements.append(table)
+#     elements.append(Spacer(1, 0.5*cm))
+
+#     # Total
+#     elements.append(Paragraph(f"<b>Total: R{total_price:.2f}</b>", styles["Heading2"]))
+#     elements.append(Spacer(1, 0.5*cm))
+#     elements.append(Paragraph("Thank you for choosing Kay Scoops!", normal))
+
+#     # Build PDF
+#     doc.build(elements)
+#     print(f"✅ Invoice generated: {filename}")
+
+# if __name__ == "__main__":
+#     generate_invoice(1)  # Example: generate invoice for scoop with ID 1
+
+
+from fpdf import FPDF
 import sqlite3
 import os
+
+class InvoicePDF(FPDF):
+    def header(self):
+        # Optional global header override (we'll build manually instead)
+        pass
 
 def generate_invoice(scoop_id):
     conn = sqlite3.connect("scoop_tracker.db")
@@ -18,6 +115,7 @@ def generate_invoice(scoop_id):
         WHERE s.id = ?
     """, (scoop_id,))
     scoop = cursor.fetchone()
+
     if not scoop:
         print("❌ Scoop not found!")
         return
@@ -34,61 +132,83 @@ def generate_invoice(scoop_id):
     items = cursor.fetchall()
     conn.close()
 
+    # Calculate total cost price
+    total_cost_price = sum(qty * cost for _, qty, cost, _ in items)
+
     # Prepare PDF
     filename = f"invoice_{scoop_id}.pdf"
-    doc = SimpleDocTemplate(filename, pagesize=A4)
-    elements = []
-    styles = getSampleStyleSheet()
-    title_style = styles["Title"]
-    normal = styles["Normal"]
+    pdf = InvoicePDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
 
-    # Add logo (if exists)
+    # Logo
     if os.path.exists("assets/kay.png"):
-        logo = Image("assets/kay.png", width=4*cm, height=4*cm)
-        logo.hAlign = "LEFT"
-        elements.append(logo)
-        elements.append(Spacer(1, 0.5*cm))
+        pdf.image("assets/kay.png", x=10, y=10, w=30)
+        pdf.ln(25)
 
-    # Header
-    elements.append(Paragraph("<b>Kay Scoops - Sweet Surprises</b>", title_style))
-    elements.append(Spacer(1, 0.3*cm))
-    elements.append(Paragraph(f"<b>Invoice #{scoop_id}</b>", normal))
-    elements.append(Paragraph(f"Date: {date}", normal))
-    elements.append(Spacer(1, 0.3*cm))
+    # Title
+    pdf.set_text_color(120, 60, 60)   # soft warm reddish-brown
+    pdf.set_font("Helvetica", "B", 20)
+    pdf.cell(0, 10, "Kay Scoops - Sweet Surprises", ln=True)
+    pdf.set_text_color(0, 0, 0)  # reset
+    
+    pdf.set_font("Helvetica", "", 12)
+    pdf.ln(3)
+    pdf.cell(0, 8, f"Invoice #{scoop_id}", ln=True)
+    pdf.cell(0, 6, f"Date: {date}", ln=True)
+    pdf.ln(4)
 
     # Client info
-    elements.append(Paragraph(f"<b>Client:</b> {client_name}", normal))
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 6, "Client Information:", ln=True)
+
+    pdf.set_font("Helvetica", "", 12)
+    pdf.cell(0, 6, f"Name: {client_name}", ln=True)
     if phone:
-        elements.append(Paragraph(f"<b>Phone:</b> {phone}", normal))
+        pdf.cell(0, 6, f"Phone: {phone}", ln=True)
     if email:
-        elements.append(Paragraph(f"<b>Email:</b> {email}", normal))
-    elements.append(Spacer(1, 0.5*cm))
+        pdf.cell(0, 6, f"Email: {email}", ln=True)
+    pdf.ln(5)
 
-    # Item table
-    table_data = [["Item", "Qty", "Cost Price (R)", "Selling Price (R)"]]
+    # TABLE HEADER
+    pdf.set_fill_color(242, 196, 196)  # #f2c4c4
+    pdf.set_text_color(255, 255, 255)
+    pdf.set_font("Helvetica", "B", 12)
+
+    pdf.cell(60, 10, "Item", border=1, align="C", fill=True)
+    pdf.cell(20, 10, "Qty", border=1, align="C", fill=True)
+    pdf.cell(40, 10, "Cost Price (R)", border=1, align="C", fill=True)
+    pdf.cell(40, 10, "Selling Price (R)", border=1, align="C", fill=True)
+    pdf.ln()
+
+    # TABLE ROWS
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_font("Helvetica", "", 12)
+
     for name, qty, cost, sell in items:
-        table_data.append([name, qty, f"{cost:.2f}", f"{sell:.2f}"])
+        pdf.cell(60, 10, name, border=1, align="C")
+        pdf.cell(20, 10, str(qty), border=1, align="C")
+        pdf.cell(40, 10, f"{cost:.2f}", border=1, align="C")
+        pdf.cell(40, 10, f"{sell:.2f}", border=1, align="C")
+        pdf.ln()
 
-    table = Table(table_data, colWidths=[6*cm, 2*cm, 4*cm, 4*cm])
-    table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#f2c4c4")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("BOTTOMPADDING", (0, 0), (-1, 0), 8),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-    ]))
-    elements.append(table)
-    elements.append(Spacer(1, 0.5*cm))
+    pdf.ln(5)
 
-    # Total
-    elements.append(Paragraph(f"<b>Total: R{total_price:.2f}</b>", styles["Heading2"]))
-    elements.append(Spacer(1, 0.5*cm))
-    elements.append(Paragraph("Thank you for choosing Kay Scoops!", normal))
+    # TOTALS SECTION
+    pdf.set_font("Helvetica", "B", 14)
+    pdf.cell(0, 8, f"Total Selling Price: R{total_price:.2f}", ln=True)
 
-    # Build PDF
-    doc.build(elements)
+    pdf.set_font("Helvetica", "B", 14)
+    pdf.cell(0, 8, f"Total Cost Price: R{total_cost_price:.2f}", ln=True)
+
+    pdf.ln(8)
+    pdf.set_font("Helvetica", "", 12)
+    pdf.cell(0, 8, "Thank you for choosing Kay Scoops!", ln=True)
+
+    # Save PDF
+    pdf.output(filename)
     print(f"✅ Invoice generated: {filename}")
 
 if __name__ == "__main__":
-    generate_invoice(1)  # Example: generate invoice for scoop with ID 1
+    generate_invoice(1)
+
