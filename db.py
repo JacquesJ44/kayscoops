@@ -1,11 +1,34 @@
 import sqlite3
+import os
+from kivy.utils import platform
 
-# Database file
-DB_FILE = "scoop_tracker.db"
+# -----------------------------
+# Determine database path
+# -----------------------------
+def get_db_path():
+    if platform == "android":
+        try:
+            from android.storage import app_storage_path
+            app_path = app_storage_path()
+        except ImportError:
+            # This happens when running on desktop
+            app_path = os.getcwd()
+
+        return os.path.join(app_path, "kayscoops.db")
+
+    # Desktop fallback
+    return os.path.join(os.getcwd(), "kayscoops.db")
+
+
+DB_PATH = get_db_path()
 
 def create_tables():
-    conn = sqlite3.connect(DB_FILE)
-    conn.execute("PRAGMA foreign_keys = ON")  # enforce foreign keys
+    # Ensure the folder exists (Android sometimes needs this)
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+
+    # Very important for Android (ensures DB opens cleanly)
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    conn.execute("PRAGMA foreign_keys = ON")
     cursor = conn.cursor()
 
     # Clients table
@@ -59,4 +82,5 @@ def create_tables():
     print("Database and tables created successfully!")
 
 if __name__ == "__main__":
+    print("DB Path:", DB_PATH)
     create_tables()

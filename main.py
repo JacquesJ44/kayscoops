@@ -5,10 +5,13 @@ from client_window import ClientScreen
 from items_window import ItemsScreen
 from new_scoop_window import NewScoopScreen
 from orders_window import OrdersScreen
-# import other screens as needed
+
+from db import create_tables
 
 class KayScoopsApp(App):
     def build(self):
+        create_tables()
+        
         sm = ScreenManager()
 
         # Add screens with consistent names
