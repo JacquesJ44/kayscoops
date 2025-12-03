@@ -1,7 +1,7 @@
 import sqlite3
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent / "scoop_tracker.db"
+DB_PATH = Path(__file__).parent / "kayscoops.db"
 
 class DBOps:
     def __init__(self, db_path=DB_PATH):
