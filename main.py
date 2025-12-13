@@ -6,11 +6,11 @@ from items_window import ItemsScreen
 from new_scoop_window import NewScoopScreen
 from orders_window import OrdersScreen
 
-from db import create_tables
+from db import init_db
 
 class KayScoopsApp(App):
     def build(self):
-        create_tables()
+        init_db()
         
         sm = ScreenManager()
 

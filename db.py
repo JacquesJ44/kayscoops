@@ -2,23 +2,22 @@ import sqlite3
 import os
 from kivy.utils import platform
 
+DB_PATH = None
+
 # -----------------------------
 # Determine database path
 # -----------------------------
 def get_db_path():
     if platform == "android":
         from android.storage import app_storage_path
-        app_path = app_storage_path()  # /data/data/<package>/files
-        return os.path.join(app_path, "kayscoops.db")
+        return os.path.join(app_storage_path(), "kayscoops.db")
 
-    # Desktop fallback
     return os.path.join(os.getcwd(), "kayscoops.db")
 
-DB_PATH = get_db_path()
 
-def create_tables():
-    # Ensure the folder exists (Android sometimes needs this)
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+def init_db():
+    global DB_PATH
+    DB_PATH = get_db_path()
 
     # Very important for Android (ensures DB opens cleanly)
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
@@ -77,4 +76,4 @@ def create_tables():
 
 if __name__ == "__main__":
     print("DB Path:", DB_PATH)
-    create_tables()
+    init_db()
