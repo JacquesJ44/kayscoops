@@ -7,18 +7,12 @@ from kivy.utils import platform
 # -----------------------------
 def get_db_path():
     if platform == "android":
-        try:
-            from android.storage import app_storage_path
-            app_path = app_storage_path()
-        except ImportError:
-            # This happens when running on desktop
-            app_path = os.getcwd()
-
+        from android.storage import app_storage_path
+        app_path = app_storage_path()  # /data/data/<package>/files
         return os.path.join(app_path, "kayscoops.db")
 
     # Desktop fallback
     return os.path.join(os.getcwd(), "kayscoops.db")
-
 
 DB_PATH = get_db_path()
 
