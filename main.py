@@ -1,4 +1,5 @@
 from kivy.app import App
+from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager
 from dashboard_window import DashboardScreen
 from client_window import ClientScreen
@@ -11,6 +12,12 @@ from db import init_db
 class KayScoopsApp(App):
     def build(self):
         init_db()
+        
+        Builder.load_file("dashboard_screen.kv")
+        Builder.load_file("client_screen.kv")
+        Builder.load_file("items_screen.kv")
+        Builder.load_file("new_scoop_screen.kv")
+        Builder.load_file("orders_screen.kv")
         
         sm = ScreenManager()
 
