@@ -9,7 +9,7 @@ class InvoicePDF(FPDF):
         pass
 
 def generate_invoice(scoop_id):
-    conn = sqlite3.connect("scoop_tracker.db")
+    conn = sqlite3.connect("kayscoops.db")
     cursor = conn.cursor()
 
     # Fetch scoop + client info
@@ -22,7 +22,7 @@ def generate_invoice(scoop_id):
     scoop = cursor.fetchone()
 
     if not scoop:
-        print("❌ Scoop not found!")
+        print("Scoop not found!")
         return
 
     scoop_id, date, total_price, client_name, phone, email = scoop

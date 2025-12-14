@@ -1,2 +1,2 @@
 kivy
-fpdf2
+fpdf
