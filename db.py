@@ -1,27 +1,25 @@
 import sqlite3
 import os
-from kivy.utils import platform
-
-DB_PATH = None
+from kivy.app import App
 
 # -----------------------------
 # Determine database path
 # -----------------------------
 def get_db_path():
-    if platform == "android":
-        from android.storage import app_storage_path
-        return os.path.join(app_storage_path(), "kayscoops.db")
+    app = App.get_running_app()
+    if not app:
+        raise RuntimeError("Kivy App not running yet")
+    return os.path.join(app.user_data_dir, "kayscoops.db")
 
-    return os.path.join(os.getcwd(), "kayscoops.db")
-
+def get_connection():
+    # Very important for Android (ensures DB opens cleanly)
+    conn = sqlite3.connect(get_db_path(), check_same_thread=False)
+    conn.execute("PRAGMA foreign_keys = ON")
+    return conn
 
 def init_db():
-    global DB_PATH
-    DB_PATH = get_db_path()
 
-    # Very important for Android (ensures DB opens cleanly)
-    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-    conn.execute("PRAGMA foreign_keys = ON")
+    conn = get_connection()
     cursor = conn.cursor()
 
     # Clients table
@@ -75,5 +73,5 @@ def init_db():
     print("Database and tables created successfully!")
 
 if __name__ == "__main__":
-    print("DB Path:", DB_PATH)
+    print("DB Path:", get_db_path())
     init_db()
