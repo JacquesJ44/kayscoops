@@ -3,6 +3,7 @@ from kivy.properties import ListProperty, StringProperty, ObjectProperty
 from kivy.clock import mainthread
 from kivy.lang import Builder
 import os
+import sqlite3
 
 from db_ops import DBOps
 from invoice_generator import generate_invoice
@@ -31,7 +32,16 @@ class OrdersScreen(Screen):
 
     # ---------- Refresh Orders ----------
     def refresh_orders(self, search=""):
-        self.orders_raw = DB.fetch_orders(search)
+        try:
+            self.orders_raw = DB.fetch_orders(search)
+        except sqlite3.OperationalError as e:
+            if "no such table" in str(e):
+                from db import init_db
+                init_db()  # create tables
+                self.orders_raw = DB.fetch_orders(search)
+            else:
+                raise
+
         self.orders_display = [
             f"ID: {o[0]} | Client: {o[1]} | Date: {o[2]} | Total: R{o[3]:.2f}"
             for o in self.orders_raw

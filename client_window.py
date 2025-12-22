@@ -3,6 +3,7 @@ from kivy.properties import ObjectProperty
 from kivy.app import App
 from kivy.lang import Builder
 from db_ops import DBOps
+import sqlite3
 
 DB = DBOps()
 
@@ -25,7 +26,17 @@ class ClientScreen(Screen):
 
     def refresh_clients(self, search_term=None):
         """Fetch clients from DB and update table/list."""
-        self.clients = DB.fetch_clients(search_term)
+        try:
+            self.clients = DB.fetch_clients(search_term)
+        except sqlite3.OperationalError as e:
+            if "no such table" in str(e):
+                from db import init_db
+                init_db()  # create tables
+                self.clients = DB.fetch_clients(search_term)
+            else:
+                raise
+
+
         self.client_list.clear_widgets()
 
         # Add headings

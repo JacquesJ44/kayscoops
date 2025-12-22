@@ -12,30 +12,41 @@ def generate_invoice(scoop_id):
     conn = sqlite3.connect("kayscoops.db")
     cursor = conn.cursor()
 
-    # Fetch scoop + client info
-    cursor.execute("""
-        SELECT s.id, s.date, s.total_price, c.name, c.contact_info, c.email
-        FROM scoops s
-        JOIN clients c ON s.client_id = c.id
-        WHERE s.id = ?
-    """, (scoop_id,))
-    scoop = cursor.fetchone()
+    try:
+        # Fetch scoop + client info
+        cursor.execute("""
+            SELECT s.id, s.date, s.total_price, c.name, c.contact_info, c.email
+            FROM scoops s
+            JOIN clients c ON s.client_id = c.id
+            WHERE s.id = ?
+        """, (scoop_id,))
+        scoop = cursor.fetchone()
 
-    if not scoop:
-        print("Scoop not found!")
-        return
+        if not scoop:
+            print("Scoop not found!")
+            return
 
-    scoop_id, date, total_price, client_name, phone, email = scoop
+        scoop_id, date, total_price, client_name, phone, email = scoop
 
-    # Fetch items linked to this scoop
-    cursor.execute("""
-        SELECT i.name, si.quantity, i.cost_price, i.selling_price
-        FROM scoop_items si
-        JOIN items i ON si.item_id = i.id
-        WHERE si.scoop_id = ?
-    """, (scoop_id,))
-    items = cursor.fetchall()
-    conn.close()
+        # Fetch items linked to this scoop
+        cursor.execute("""
+            SELECT i.name, si.quantity, i.cost_price, i.selling_price
+            FROM scoop_items si
+            JOIN items i ON si.item_id = i.id
+            WHERE si.scoop_id = ?
+        """, (scoop_id,))
+        items = cursor.fetchall()
+
+    except sqlite3.OperationalError as e:
+        if "no such table" in str(e):
+            from db import init_db
+            init_db()  # create tables
+            print("Database initialized. Please try generating the invoice again.")
+            return
+        else:
+            raise
+    finally:
+        conn.close()
 
     # Calculate total cost price
     total_cost_price = sum(qty * cost for _, qty, cost, _ in items)

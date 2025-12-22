@@ -8,6 +8,7 @@ from kivy.uix.label import Label
 from kivy.graphics import Color, Rectangle
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
+import sqlite3
 
 DB = DBOps()
 
@@ -64,8 +65,17 @@ class ItemsScreen(Screen):
         self.refresh_items()
 
     def refresh_items(self, search_term=None):
-        """Fetch items from DB and populate table."""
-        self.items = DB.fetch_items(search_term)
+        """Fetch clients from DB and update table/list."""
+        try:
+            self.items = DB.fetch_items(search_term)
+        except sqlite3.OperationalError as e:
+            if "no such table" in str(e):
+                from db import init_db
+                init_db()  # create tables
+                self.items = DB.fetch_items(search_term)
+            else:
+                raise
+        
         self.items_list.clear_widgets()
 
         # Headings

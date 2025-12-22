@@ -3,6 +3,7 @@ from kivy.properties import ObjectProperty, ListProperty
 from kivy.app import App
 from kivy.lang import Builder
 from db_ops import DBOps
+import sqlite3
 
 DB = DBOps()
 
@@ -57,7 +58,15 @@ class NewScoopScreen(Screen):
 
     # ---------- Client ----------
     def refresh_clients(self, search_term=""):
-        self.clients = DB.fetch_clients(search_term)
+        try:
+            self.clients = DB.fetch_clients(search_term)
+        except sqlite3.OperationalError as e:
+            if "no such table" in str(e):
+                from db import init_db
+                init_db()  # create tables
+                self.clients = DB.fetch_clients(search_term)
+            else:
+                raise
         self.client_dropdown.values = [f"{c[1]} (ID:{c[0]})" for c in self.clients]
 
     def client_search_changed(self, instance, value):
@@ -65,7 +74,15 @@ class NewScoopScreen(Screen):
 
     # ---------- Items ----------
     def refresh_items(self, search_term=""):
-        self.items = DB.fetch_items(search_term)
+        try:
+            self.items = DB.fetch_items(search_term)
+        except sqlite3.OperationalError as e:
+            if "no such table" in str(e):
+                from db import init_db
+                init_db()  # create tables
+                self.items = DB.fetch_items(search_term)
+            else:
+                raise
         self.item_dropdown.values = [f"{i[1]} (Stock:{i[2]})" for i in self.items]
 
     def item_search_changed(self, instance, value):
