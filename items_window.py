@@ -62,7 +62,7 @@ class ItemsScreen(Screen):
         """Refresh clients whenever screen is opened."""
         if not hasattr(self, 'db'):
             self.db = DBOps()  # safe lazy init
-        self.refresh_clients()
+        self.refresh_items()
 
     def refresh_items(self, search_term=None):
         """Fetch clients from DB and update table/list."""
