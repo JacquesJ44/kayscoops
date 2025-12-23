@@ -5,8 +5,6 @@ from kivy.lang import Builder
 from db_ops import DBOps
 import sqlite3
 
-DB = DBOps()
-
 # Load KV file
 Builder.load_file("new_scoop_screen.kv")
 
@@ -50,6 +48,8 @@ class NewScoopScreen(Screen):
 
     def on_pre_enter(self):
         """Bind search inputs and refresh data."""
+        if not hasattr(self, 'db'):
+            self.db = DBOps()
         self.client_search.bind(text=self.client_search_changed)
         self.item_search.bind(text=self.item_search_changed)
         self.refresh_clients()
@@ -59,12 +59,12 @@ class NewScoopScreen(Screen):
     # ---------- Client ----------
     def refresh_clients(self, search_term=""):
         try:
-            self.clients = DB.fetch_clients(search_term)
+            self.clients = self.db.fetch_clients(search_term)
         except sqlite3.OperationalError as e:
             if "no such table" in str(e):
                 from db import init_db
                 init_db()  # create tables
-                self.clients = DB.fetch_clients(search_term)
+                self.clients = self.db.fetch_clients(search_term)
             else:
                 raise
         self.client_dropdown.values = [f"{c[1]} (ID:{c[0]})" for c in self.clients]
@@ -75,12 +75,12 @@ class NewScoopScreen(Screen):
     # ---------- Items ----------
     def refresh_items(self, search_term=""):
         try:
-            self.items = DB.fetch_items(search_term)
+            self.items = self.db.fetch_items(search_term)
         except sqlite3.OperationalError as e:
             if "no such table" in str(e):
                 from db import init_db
                 init_db()  # create tables
-                self.items = DB.fetch_items(search_term)
+                self.items = self.db.fetch_items(search_term)
             else:
                 raise
         self.item_dropdown.values = [f"{i[1]} (Stock:{i[2]})" for i in self.items]
@@ -146,7 +146,7 @@ class NewScoopScreen(Screen):
             return
 
         client_id = int(client_text.split("ID:")[1].strip(")"))
-        DB.save_scoop(client_id, price, self.current_scoop_items)
+        self.db.save_scoop(client_id, price, self.current_scoop_items)
         App.get_running_app().popup("Success", f"Scoop for {client_text.split(' (')[0]} saved!")
 
         # Reset

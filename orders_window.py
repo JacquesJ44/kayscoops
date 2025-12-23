@@ -8,8 +8,6 @@ import sqlite3
 from db_ops import DBOps
 from invoice_generator import generate_invoice
 
-DB = DBOps()
-
 # Custom Button for list items
 from kivy.uix.button import Button
 
@@ -27,18 +25,20 @@ class OrdersScreen(Screen):
     selected_order = None               # Selected order string
 
     def on_pre_enter(self):
-        """Load all orders on entering the screen."""
+        """Refresh clients whenever screen is opened."""
+        if not hasattr(self, 'db'):
+            self.db = DBOps()  # safe lazy init
         self.refresh_orders()
 
     # ---------- Refresh Orders ----------
     def refresh_orders(self, search=""):
         try:
-            self.orders_raw = DB.fetch_orders(search)
+            self.orders_raw = self.db.fetch_orders(search)
         except sqlite3.OperationalError as e:
             if "no such table" in str(e):
                 from db import init_db
                 init_db()  # create tables
-                self.orders_raw = DB.fetch_orders(search)
+                self.orders_raw = self.db.fetch_orders(search)
             else:
                 raise
 

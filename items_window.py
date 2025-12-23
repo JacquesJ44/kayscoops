@@ -10,8 +10,6 @@ from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 import sqlite3
 
-DB = DBOps()
-
 # Load KV file
 Builder.load_file("items_screen.kv")
 
@@ -61,18 +59,20 @@ class ItemsScreen(Screen):
     items = []
 
     def on_pre_enter(self):
-        """Refresh items whenever screen is opened."""
-        self.refresh_items()
+        """Refresh clients whenever screen is opened."""
+        if not hasattr(self, 'db'):
+            self.db = DBOps()  # safe lazy init
+        self.refresh_clients()
 
     def refresh_items(self, search_term=None):
         """Fetch clients from DB and update table/list."""
         try:
-            self.items = DB.fetch_items(search_term)
+            self.items = self.db.fetch_items(search_term)
         except sqlite3.OperationalError as e:
             if "no such table" in str(e):
                 from db import init_db
                 init_db()  # create tables
-                self.items = DB.fetch_items(search_term)
+                self.items = self.db.fetch_items(search_term)
             else:
                 raise
         
@@ -124,7 +124,7 @@ class ItemsScreen(Screen):
             App.get_running_app().popup("Error", "Please enter name and quantity!")
             return
 
-        DB.add_item(name, int(quantity), float(cost) if cost else 0, float(selling) if selling else 0)
+        self.db.add_item(name, int(quantity), float(cost) if cost else 0, float(selling) if selling else 0)
         App.get_running_app().popup("Success", f"Item '{name}' added successfully!")
         self.refresh_items()
 
@@ -142,7 +142,7 @@ class ItemsScreen(Screen):
             App.get_running_app().popup("Error", "Please enter name and quantity!")
             return
 
-        DB.update_item(self.selected_item_id, name, int(quantity), float(cost) if cost else 0, float(selling) if selling else 0)
+        self.db.update_item(self.selected_item_id, name, int(quantity), float(cost) if cost else 0, float(selling) if selling else 0)
         App.get_running_app().popup("Success", f"Item '{name}' updated successfully!")
         self.refresh_items()
 
@@ -165,7 +165,7 @@ class ItemsScreen(Screen):
 
         def on_confirm(instance):
             try:
-                DB.delete_item(self.selected_item_id)
+                self.db.delete_item(self.selected_item_id)
                 App.get_running_app().popup("Deleted", "Item deleted successfully!")
                 self.selected_item_id = None
                 self.refresh_items()

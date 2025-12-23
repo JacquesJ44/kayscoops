@@ -3,12 +3,18 @@ from db import get_db_path
 
 class DBOps:
     def __init__(self):
-        self.db_path = get_db_path()
+        self.db_path = None
+
+    def _ensure_db_path(self):
+        if self._db_path is None:
+            self._db_path = get_db_path()
 
     def get_connection(self):
+        self._ensure_db_path()
         conn = sqlite3.connect(self.db_path, check_same_thread=False)
         conn.execute("PRAGMA foreign_keys = ON")
         return conn
+    
 
     # ---------- Client Functions ----------
     def add_client(self, name, contact, email):

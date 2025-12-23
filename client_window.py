@@ -5,8 +5,6 @@ from kivy.lang import Builder
 from db_ops import DBOps
 import sqlite3
 
-DB = DBOps()
-
 # Load KV file
 Builder.load_file("client_screen.kv")
 
@@ -22,17 +20,19 @@ class ClientScreen(Screen):
 
     def on_pre_enter(self):
         """Refresh clients whenever screen is opened."""
+        if not hasattr(self, 'db'):
+            self.db = DBOps()  # safe lazy init
         self.refresh_clients()
 
     def refresh_clients(self, search_term=None):
         """Fetch clients from DB and update table/list."""
         try:
-            self.clients = DB.fetch_clients(search_term)
+            self.clients = self.db.fetch_clients(search_term)
         except sqlite3.OperationalError as e:
             if "no such table" in str(e):
                 from db import init_db
                 init_db()  # create tables
-                self.clients = DB.fetch_clients(search_term)
+                self.clients = self.db.fetch_clients(search_term)
             else:
                 raise
 
@@ -83,11 +83,11 @@ class ClientScreen(Screen):
             App.get_running_app().popup("Error", "Please enter a name!")
             return
 
-        if email and DB.email_exists(email):
+        if email and self.db.email_exists(email):
             App.get_running_app().popup("Error", f"Email '{email}' is already registered!")
             return
 
-        DB.add_client(name, contact, email)
+        self.db.add_client(name, contact, email)
         App.get_running_app().popup("Success", f"Client '{name}' added successfully!")
         self.refresh_clients()
 
@@ -104,7 +104,7 @@ class ClientScreen(Screen):
             App.get_running_app().popup("Error", "Please enter a name!")
             return
 
-        DB.update_client(self.selected_client_id, name, contact, email)
+        self.db.update_client(self.selected_client_id, name, contact, email)
         App.get_running_app().popup("Success", f"Client '{name}' updated successfully!")
         self.refresh_clients()
 
@@ -114,7 +114,7 @@ class ClientScreen(Screen):
             return
 
         def on_confirm(instance):
-            DB.delete_client(self.selected_client_id)
+            self.db.delete_client(self.selected_client_id)
             self.selected_client_id = None
             self.refresh_clients()
             App.get_running_app().popup("Deleted", "Client deleted successfully!")

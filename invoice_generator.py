@@ -1,7 +1,7 @@
-
 from fpdf import FPDF
 import sqlite3
 import os
+from db_ops import DBOps
 
 class InvoicePDF(FPDF):
     def header(self):
@@ -9,7 +9,8 @@ class InvoicePDF(FPDF):
         pass
 
 def generate_invoice(scoop_id):
-    conn = sqlite3.connect("kayscoops.db")
+    db = DBOps()
+    conn = db.get_connection()
     cursor = conn.cursor()
 
     try:
@@ -37,10 +38,10 @@ def generate_invoice(scoop_id):
         """, (scoop_id,))
         items = cursor.fetchall()
 
-    except sqlite3.OperationalError as e:
-        if "no such table" in str(e):
+    except Exception as e:
+        if isinstance(e, sqlite3.OperationalError) and "no such table" in str(e):
             from db import init_db
-            init_db()  # create tables
+            init_db()
             print("Database initialized. Please try generating the invoice again.")
             return
         else:
@@ -123,7 +124,7 @@ def generate_invoice(scoop_id):
 
     # Save PDF
     pdf.output(filename)
-    print(f"✅ Invoice generated: {filename}")
+    print(f"Invoice generated: {filename}")
 
 if __name__ == "__main__":
     generate_invoice(1)
