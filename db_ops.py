@@ -109,19 +109,21 @@ class DBOps:
 
     # ---------- Scoop Functions ----------     
     def save_scoop(self, client_id, scoop_price, items, video_url=None):
-        from datetime import datetime
-        import zoneinfo
+        from datetime import datetime, timedelta
 
-        # Create SA timestamp for consistency everywhere
-        sa_tz = zoneinfo.ZoneInfo("Africa/Johannesburg")
-        local_dt = datetime.now(sa_tz).strftime("%Y-%m-%d %H:%M:%S")
+        # UTC now
+        utc_now = datetime.utcnow()
+        # Johannesburg offset is +2 hours
+        local_dt = utc_now + timedelta(hours=2)
+        # Format as string
+        local_dt_str = local_dt.strftime("%Y-%m-%d %H:%M:%S")
 
         with self.get_connection() as conn:
             cursor = conn.cursor()
             # Insert scoop
             cursor.execute(
                 "INSERT INTO scoops (client_id, date, total_price, video_url) VALUES (?, ?, ?, ?)",
-                (client_id, local_dt, scoop_price, video_url)
+                (client_id, local_dt_str, scoop_price, video_url)
             )
             scoop_id = cursor.lastrowid
 
