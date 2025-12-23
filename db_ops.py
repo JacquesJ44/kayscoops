@@ -6,8 +6,8 @@ class DBOps:
         self.db_path = None
 
     def _ensure_db_path(self):
-        if self._db_path is None:
-            self._db_path = get_db_path()
+        if self.db_path is None:
+            self.db_path = get_db_path()
 
     def get_connection(self):
         self._ensure_db_path()
