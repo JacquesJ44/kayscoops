@@ -1,14 +1,12 @@
 import sqlite3
-from pathlib import Path
-
-DB_PATH = Path(__file__).parent / "kayscoops.db"
+from db import get_db_path
 
 class DBOps:
-    def __init__(self, db_path=DB_PATH):
-        self.db_path = db_path
+    def __init__(self):
+        self.db_path = get_db_path()
 
     def get_connection(self):
-        conn = sqlite3.connect(self.db_path)
+        conn = sqlite3.connect(self.db_path, check_same_thread=False)
         conn.execute("PRAGMA foreign_keys = ON")
         return conn
 
@@ -104,7 +102,7 @@ class DBOps:
             return rows
 
     # ---------- Scoop Functions ----------     
-    def save_scoop(self,client_id, scoop_price, items, video_url=None):
+    def save_scoop(self, client_id, scoop_price, items, video_url=None):
         from datetime import datetime
         import zoneinfo
 
