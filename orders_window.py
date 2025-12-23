@@ -4,12 +4,32 @@ from kivy.clock import mainthread
 from kivy.lang import Builder
 import os
 import sqlite3
+import sys
 
 from db_ops import DBOps
 from invoice_generator import generate_invoice
 
 # Custom Button for list items
 from kivy.uix.button import Button
+
+def get_invoice_path(scoop_id):
+    ANDROID = False
+    downloads = os.path.expanduser("~/Downloads")  # default desktop path
+
+    try:
+        # This only works on Android
+        from android.storage import primary_external_storage_path
+        ANDROID = True
+        downloads = os.path.join(primary_external_storage_path(), "Download")
+        if not os.path.exists(downloads):
+            os.makedirs(downloads)
+    except ImportError:
+        # Not on Android, fallback to desktop Downloads
+        pass
+    except Exception as e:
+        print(f"Warning: could not access Android storage: {e}")
+
+    return os.path.join(downloads, f"invoice_{scoop_id}.pdf"), ANDROID
 
 class OrderLabel(Button):
     parent_screen = ObjectProperty()
@@ -65,15 +85,16 @@ class OrdersScreen(Screen):
 
         try:
             scoop_id = int(self.selected_order.split("ID: ")[1].split(" ")[0])
-            generate_invoice(scoop_id)
-            filename = f"invoice_{scoop_id}.pdf"
+            filepath, ANDROID = get_invoice_path(scoop_id)
+            generate_invoice(scoop_id, filepath)
 
-            if os.path.exists(filename):
-                if os.name == "nt":
-                    os.startfile(filename)
-                else:
-                    os.system(f"open '{filename}'")
-                self.ids.status_label.text = f"Invoice generated: {filename}"
+            if os.path.exists(filepath):
+                if not ANDROID:  # desktop
+                    if os.name == "nt":
+                        os.startfile(filepath)
+                    else:
+                        os.system(f"open '{filepath}'")
+                self.ids.status_label.text = f"Invoice generated: {filepath}"
             else:
                 self.ids.status_label.text = "Failed to generate invoice."
 

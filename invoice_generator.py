@@ -8,7 +8,7 @@ class InvoicePDF(FPDF):
         # Optional global header override (we'll build manually instead)
         pass
 
-def generate_invoice(scoop_id):
+def generate_invoice(scoop_id, filepath):
     db = DBOps()
     conn = db.get_connection()
     cursor = conn.cursor()
@@ -123,9 +123,8 @@ def generate_invoice(scoop_id):
     pdf.cell(0, 8, "Thank you for choosing Kay Scoops!", ln=True)
 
     # Save PDF
-    pdf.output(filename)
-    print(f"Invoice generated: {filename}")
+    pdf.output(filepath)
+    print(f"Invoice generated: {filepath}")
 
 if __name__ == "__main__":
-    generate_invoice(1)
-
+    generate_invoice(1, "invoice_1.pdf")
